@@ -153,7 +153,6 @@ public class MyConfig implements WXPayConfig {
         return 10000;
     }
 
-
     /**
      * 判断字符串是否为NULL或空
      *
