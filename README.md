@@ -62,3 +62,6 @@ uman_config.properties
 	- 退款refund();
 	- 订单下载downloadBill();
 	- 通知notify();
+
+# 相关文档: #
+[微信文档](https://pay.weixin.qq.com/wiki/doc/api/index.html)
