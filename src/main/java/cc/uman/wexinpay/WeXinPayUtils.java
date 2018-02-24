@@ -1,14 +1,17 @@
 package cc.uman.wexinpay;
 
 
-import cc.uman.wexinpay.bean.NotifyBean;
 import cc.uman.wexinpay.sdk.WXPay;
 import cc.uman.wexinpay.sdk.WXPayUtil;
 import cc.uman.wexinpay.util.WeiXinPayUtils;
+import org.jdom.JDOMException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -66,8 +69,26 @@ public class WeXinPayUtils {
      * @param request
      * @return
      */
-    public static NotifyBean notifyAnalysis(HttpServletRequest request) throws IOException, JAXBException {
-        return (NotifyBean) WeiXinPayUtils.xmlToBean(request.getInputStream(), NotifyBean.class);
+    public static boolean notify(HttpServletRequest request) throws IOException, JAXBException, JDOMException {
+        //读取参数
+        InputStream inputStream;
+        StringBuffer sb = new StringBuffer();
+        inputStream = request.getInputStream();
+        String s;
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        while ((s = in.readLine()) != null) {
+            sb.append(s);
+        }
+        in.close();
+        inputStream.close();
+        //解析xml成map
+        Map<String, String> m = new HashMap<String, String>();
+        m = WeiXinPayUtils.doXMLParse(sb.toString());
+        String return_code = m.get("return_code");
+        if ("FAIL".equalsIgnoreCase(return_code)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -77,8 +98,8 @@ public class WeXinPayUtils {
      * @return
      * @throws Exception
      */
-    public static Map<String, String> query(String out_trade_no) throws Exception {
-        MyConfig config = new MyConfig();
+    public static Map<String, String> orderQuery(String out_trade_no) throws Exception {
+        MyConfig config = MyConfig.getConfig().loadPropertiesFromSrc();
         WXPay wxpay = new WXPay(config);
 
         Map<String, String> data = new HashMap<String, String>();
@@ -94,14 +115,61 @@ public class WeXinPayUtils {
     }
 
     /**
-     * 退款
+     * 关闭订单
+     *
+     * @param out_trade_no
+     * @return
+     * @throws Exception
+     */
+    public static boolean closeOrder(String out_trade_no) throws Exception {
+        MyConfig config = MyConfig.getConfig().loadPropertiesFromSrc();
+        WXPay wxpay = new WXPay(config);
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("out_trade_no", out_trade_no);
+        try {
+            Map<String, String> resp = wxpay.closeOrder(data);
+            if ("SUCCESS".equals(resp.get("return_code"))) {
+                return true;
+            } else if ("FAIL".equals(resp.get("return_code"))) {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * 申请退款
      *
      * @param out_trade_no
      * @return
      * @throws Exception
      */
     public static Map<String, String> refund(String out_trade_no) throws Exception {
-        MyConfig config = new MyConfig();
+        MyConfig config = MyConfig.getConfig().loadPropertiesFromSrc();
+        WXPay wxpay = new WXPay(config);
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("out_trade_no", out_trade_no);
+        try {
+            Map<String, String> resp = wxpay.refund(data);
+            System.out.println(resp);
+            return resp;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 查询退款
+     *
+     * @param out_trade_no
+     * @return
+     */
+    public static Map<String, String> refundQuery(String out_trade_no) {
+        MyConfig config = MyConfig.getConfig().loadPropertiesFromSrc();
         WXPay wxpay = new WXPay(config);
         Map<String, String> data = new HashMap<String, String>();
         data.put("out_trade_no", out_trade_no);
@@ -115,14 +183,15 @@ public class WeXinPayUtils {
         }
     }
 
+
     /**
      * 订单下载
      *
      * @return
      * @throws Exception
      */
-    public static Map<String, String> select() throws Exception {
-        MyConfig config = new MyConfig();
+    public static Map<String, String> downloadBill() throws Exception {
+        MyConfig config = MyConfig.getConfig().loadPropertiesFromSrc();
         WXPay wxpay = new WXPay(config);
 
         Map<String, String> data = new HashMap<String, String>();
@@ -138,9 +207,10 @@ public class WeXinPayUtils {
             return null;
         }
     }
-    public static void  main(String [] args){
+
+    public static void main(String[] args) {
         try {
-            System.out.print(WeXinPayUtils.order("http://baidu.com","测试支付","21085254222","1","138.165.123.13"));
+            System.out.print(WeXinPayUtils.order("http://baidu.com", "测试支付", "21085254222", "1", "138.165.123.13"));
         } catch (Exception e) {
             e.printStackTrace();
         }

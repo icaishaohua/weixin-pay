@@ -1,16 +1,16 @@
 package cc.uman.wexinpay.util;
 
-import cc.uman.wexinpay.bean.NotifyBean;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 /**
  * 微信支付工具类
@@ -119,57 +119,60 @@ public class WeiXinPayUtils {
         return "刚刚";
     }
 
-    /**
-     * xml文件配置转换为对象
-     *
-     * @param xml  xml
-     * @param load java对象.Class
-     * @return java对象
-     * @throws JAXBException
-     * @throws IOException
-     */
 
-    public static Object xmlToBean(InputStream xml, Class<?> load) throws JAXBException, IOException {
-        JAXBContext context = JAXBContext.newInstance(load);
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-        Object object = unmarshaller.unmarshal(xml);
-        return object;
-    }
-
-    public static void main(String[] args) {
-//        String result = getTime(new Date().getTime(), DATE_FORMAT_DATE_H);
-//        System.out.println(result);
-        String sss= "<xml>\n" +
-                "  <appid><![CDATA[wx2421b1c4370ec43b]]></appid>\n" +
-                "  <attach><![CDATA[支付测试]]></attach>\n" +
-                "  <bank_type><![CDATA[CFT]]></bank_type>\n" +
-                "  <fee_type><![CDATA[CNY]]></fee_type>\n" +
-                "  <is_subscribe><![CDATA[Y]]></is_subscribe>\n" +
-                "  <mch_id><![CDATA[10000100]]></mch_id>\n" +
-                "  <nonce_str><![CDATA[5d2b6c2a8db53831f7eda20af46e531c]]></nonce_str>\n" +
-                "  <openid><![CDATA[oUpF8uMEb4qRXf22hE3X68TekukE]]></openid>\n" +
-                "  <out_trade_no><![CDATA[1409811653]]></out_trade_no>\n" +
-                "  <result_code><![CDATA[SUCCESS]]></result_code>\n" +
-                "  <return_code><![CDATA[SUCCESS]]></return_code>\n" +
-                "  <sign><![CDATA[B552ED6B279343CB493C5DD0D78AB241]]></sign>\n" +
-                "  <sub_mch_id><![CDATA[10000100]]></sub_mch_id>\n" +
-                "  <time_end><![CDATA[20140903131540]]></time_end>\n" +
-                "  <total_fee>1</total_fee><coupon_fee><![CDATA[10]]></coupon_fee>\n" +
-                "<coupon_count><![CDATA[1]]></coupon_count>\n" +
-                "<coupon_type><![CDATA[CASH]]></coupon_type>\n" +
-                "<coupon_id><![CDATA[10000]]></coupon_id>\n" +
-                "<coupon_fee><![CDATA[100]]></coupon_fee>\n" +
-                "  <trade_type><![CDATA[JSAPI]]></trade_type>\n" +
-                "  <transaction_id><![CDATA[1004400740201409030005092168]]></transaction_id>\n" +
-                "</xml>";
-        try {
-            WeiXinPayUtils.xmlToBean(new ByteArrayInputStream(sss.getBytes()), NotifyBean.class);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public static Map doXMLParse(String strxml) throws JDOMException, IOException {
+        strxml = strxml.replaceFirst("encoding=\".*\"", "encoding=\"UTF-8\"");
+        if (null == strxml || "".equals(strxml)) {
+            return null;
         }
+        Map m = new HashMap();
+        InputStream in = new ByteArrayInputStream(strxml.getBytes("UTF-8"));
+        SAXBuilder builder = new SAXBuilder();
+        Document doc = builder.build(in);
+        Element root = doc.getRootElement();
+        List list = root.getChildren();
+        Iterator it = list.iterator();
+        while (it.hasNext()) {
+            Element e = (Element) it.next();
+            String k = e.getName();
+            String v = "";
+            List children = e.getChildren();
+            if (children.isEmpty()) {
+                v = e.getTextNormalize();
+            } else {
+                v = WeiXinPayUtils.getChildrenText(children);
+            }
+            m.put(k, v);
+        }
+        //关闭流
+        in.close();
+        return m;
     }
 
+    /**
+     * 获取子结点的xml
+     *
+     * @param children
+     * @return String
+     */
+    public static String getChildrenText(List children) {
+        StringBuffer sb = new StringBuffer();
+        if (!children.isEmpty()) {
+            Iterator it = children.iterator();
+            while (it.hasNext()) {
+                Element e = (Element) it.next();
+                String name = e.getName();
+                String value = e.getTextNormalize();
+                List list = e.getChildren();
+                sb.append("<" + name + ">");
+                if (!list.isEmpty()) {
+                    sb.append(WeiXinPayUtils.getChildrenText(list));
+                }
+                sb.append(value);
+                sb.append("</" + name + ">");
+            }
+        }
+        return sb.toString();
+    }
 
 }
