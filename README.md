@@ -18,7 +18,7 @@
     	<dependency>
     		<groupId>com.github.icaishaohua</groupId>
     		<artifactId>weixin-pay</artifactId>
-    		<version>-SNAPSHOT</version>
+    		<version>1.0.0</version>
     	</dependency>
 #   - 包引入 Gradle #
  
@@ -34,7 +34,7 @@
 2. 添加依赖
     
     	dependencies {
-    		compile 'com.github.icaishaohua:weixin-pay:-SNAPSHOT'
+    		compile 'com.github.icaishaohua:weixin-pay:1.0.0'
     	}
 
 
