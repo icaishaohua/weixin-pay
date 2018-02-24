@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>cc.uman.weixinpay</groupId>
     <artifactId>weixin-pay</artifactId>
     <version>1.0.0</version>
@@ -51,6 +50,12 @@
             <version>1.0</version>
         </dependency>
         <!--end 支付-->
+        <!--微信公众号支付-->
+        <dependency>
+            <groupId>com.github.icaishaohua</groupId>
+            <artifactId>weixin-pay</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -78,6 +83,10 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 

@@ -1,4 +1,5 @@
 # [# 微信支付(开放平台)](https://github.com/icaishaohua/weixin-pay/) #
+[![](https://jitpack.io/v/icaishaohua/weixin-pay.svg)](https://jitpack.io/#icaishaohua/weixin-pay)
 
 轻量的微信支付组件(A Lightweight WeiXin Pay Component)
 
