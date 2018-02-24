@@ -5,7 +5,7 @@
 
 	<groupId>cc.uman.weixinpay</groupId>
 	<artifactId>weixin-pay</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>weixin-pay</name>
